@@ -4,6 +4,7 @@ require(cowplot)
 require(ggdist)
 theme_set(theme_cowplot())
 
+#load all datafiles (focussing on the .csv files)
 flist <- list.files(paste0(dirname(rstudioapi::getSourceEditorContext()$path), "/Experiment/ContPsyTracking/data/"))[c(grep(".csv", list.files(paste0(dirname(rstudioapi::getSourceEditorContext()$path), "//Experiment/ContPsyTracking/data"), full.names = TRUE)))]
 
 Responses_Wide = c()
@@ -21,12 +22,17 @@ for (i in flist){
 }
 
 Responses_Wide = Responses_Wide %>%
+  #transform recorded mouse data into same unit as displayed polygon (cm from center of screen)
                       mutate(mouse_2.x = as.numeric(substr(mouse_2.x[1], 2, 7)),
                              mouse_2.y = as.numeric(substr(mouse_2.y[1], 2, 7)),
                              mouse_x_cm = x_coord_mouse*(1/mouse_2.x),
                              mouse_y_cm = y_coord_mouse*(1/mouse_2.y)) %>% 
+  
+  #filter out rows with no data (because PsychoPy .csv files can look a little messy)
                       filter(!is.na(opacity)) %>% 
-                      group_by(participant, opacity) %>% 
+                      group_by(participant) %>%
+  
+  #get median duration of frame for each participant
                       mutate(FrameDuration = median(Responses_Wide$time_in_run - lag(Responses_Wide$time_in_run, 1), na.rm = TRUE))
 
 ##################
@@ -58,8 +64,13 @@ ggplot(Responses_Wide, aes(time_in_run, y_coord_target)) +
 #Crosscorrelations#
 ###################
 
+#how many frames in 1s
 HowManyFrames = 1/median(Responses_Wide$FrameDuration)
+
 CCG_Frame = data.frame()
+
+#create copies of the dataframe where we lag target and response positions
+#by 1 to HowManyFrames in steps of 4 (only 4 to keep size of this dataframe manageable)
 for (i in seq(1,HowManyFrames,4)){
   CCG_Frame = rbind(CCG_Frame, Responses_Wide %>%
                       ungroup() %>%
@@ -70,12 +81,17 @@ for (i in seq(1,HowManyFrames,4)){
                              lag = i))
 }
 
-#Calculate the mean and median difference for each lag (separately per participant and condition)
+
 CCG_Frame = CCG_Frame %>%
   group_by(participant, opacity, lag) %>%
+  
+  #Calculate the correlation between target and response positons for each lag
+  #(separately per participant and condition and also separately for x/y directions)
   mutate(Correlation_x = cor.test(mouse_x_cm, x_coord_target_lagged)[4]$estimate[[1]],
          Correlation_y = cor.test(mouse_y_cm, y_coord_target_lagged)[4]$estimate[[1]]) %>% 
   group_by(participant, opacity) %>%
+  
+  #get the maximum correlation and the lag at which this maximum correlation is located
   mutate(MaxCorr_x = max(Correlation_x),
          Time_MaxCorr_x = lag[which.max(Correlation_x)],
          MaxCorr_y = max(Correlation_y),
