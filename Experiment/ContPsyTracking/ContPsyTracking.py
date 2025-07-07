@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2024.2.4),
-    on June 05, 2025, at 23:48
+    on July 07, 2025, at 05:05
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -35,6 +35,7 @@ from psychopy.hardware import keyboard
 
 # Run 'Before Experiment' code from code
 import numpy
+import time
 # --- Setup global variables (available in all functions) ---
 # create a device manager to handle hardware (keyboards, mice, mirophones, speakers, etc.)
 deviceManager = hardware.DeviceManager()
@@ -128,7 +129,7 @@ def setupData(expInfo, dataDir=None):
     thisExp = data.ExperimentHandler(
         name=expName, version='',
         extraInfo=expInfo, runtimeInfo=None,
-        originPath='C:\\Users\\lab\\Desktop\\ContPsyTracking.py',
+        originPath='C:\\Users\\lab\\Documents\\GitHub\\Workshop--Continuous-Psychophysics\\Experiment\\ContPsyTracking\\ContPsyTracking.py',
         savePickle=True, saveWideText=True,
         dataFileName=dataDir + os.sep + filename, sortColumns='time'
     )
@@ -363,21 +364,33 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     
     # Start Code - component code to be run after the window creation
     
+    # --- Initialize components for Routine "calibration" ---
+    mouse_2 = event.Mouse(win=win)
+    x, y = [None, None]
+    mouse_2.mouseClock = core.Clock()
+    polygon_2 = visual.ShapeStim(
+        win=win, name='polygon_2',units='cm', 
+        size=(0.05, 0.05), vertices='circle',
+        ori=0.0, pos=(1, 1), draggable=False, anchor='center',
+        lineWidth=1.0,
+        colorSpace='rgb', lineColor='white', fillColor='white',
+        opacity=None, depth=-1.0, interpolate=True)
+    
     # --- Initialize components for Routine "trial" ---
     mouse = event.Mouse(win=win)
     x, y = [None, None]
     mouse.mouseClock = core.Clock()
-    grating = visual.GratingStim(
-        win=win, name='grating',
-        tex='sin', mask=None, anchor='center',
-        ori=0.0, pos=[0,0], draggable=True, size=(0.5, 0.5), sf=None, phase=0.0,
-        color=[1,1,1], colorSpace='rgb',
-        opacity=0.5, contrast=1.0, blendmode='avg',
-        texRes=128.0, interpolate=True, depth=-1.0)
+    polygon = visual.ShapeStim(
+        win=win, name='polygon',units='cm', 
+        size=(1, 1), vertices='circle',
+        ori=0.0, pos=[0,0], draggable=False, anchor='center',
+        lineWidth=1.0,
+        colorSpace='rgb', lineColor='white', fillColor='white',
+        opacity=1.0, depth=-1.0, interpolate=True)
     # Run 'Begin Experiment' code from code
-    posx = 0.5
-    posy = 0.5
-    pos = (posx, posy)
+    #randomize which opacity we start with
+    a = [0.03,1]
+    opacity = numpy.random.choice(a)
     
     # create some handy timers
     
@@ -407,32 +420,33 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         format='%Y-%m-%d %Hh%M.%S.%f %z', fractionalSecondDigits=6
     )
     
-    # --- Prepare to start Routine "trial" ---
-    # create an object to store info about Routine trial
-    trial = data.Routine(
-        name='trial',
-        components=[mouse, grating],
+    # --- Prepare to start Routine "calibration" ---
+    # create an object to store info about Routine calibration
+    calibration = data.Routine(
+        name='calibration',
+        components=[mouse_2, polygon_2],
     )
-    trial.status = NOT_STARTED
+    calibration.status = NOT_STARTED
     continueRoutine = True
     # update component parameters for each repeat
-    # setup some python lists for storing info about the mouse
-    mouse.x = []
-    mouse.y = []
-    mouse.leftButton = []
-    mouse.midButton = []
-    mouse.rightButton = []
-    mouse.time = []
+    # setup some python lists for storing info about the mouse_2
+    mouse_2.x = []
+    mouse_2.y = []
+    mouse_2.leftButton = []
+    mouse_2.midButton = []
+    mouse_2.rightButton = []
+    mouse_2.time = []
+    mouse_2.corr = []
     gotValidClick = False  # until a click is received
-    # store start times for trial
-    trial.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
-    trial.tStart = globalClock.getTime(format='float')
-    trial.status = STARTED
-    thisExp.addData('trial.started', trial.tStart)
-    trial.maxDuration = None
+    # store start times for calibration
+    calibration.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
+    calibration.tStart = globalClock.getTime(format='float')
+    calibration.status = STARTED
+    thisExp.addData('calibration.started', calibration.tStart)
+    calibration.maxDuration = None
     # keep track of which components have finished
-    trialComponents = trial.components
-    for thisComponent in trial.components:
+    calibrationComponents = calibration.components
+    for thisComponent in calibration.components:
         thisComponent.tStart = None
         thisComponent.tStop = None
         thisComponent.tStartRefresh = None
@@ -444,90 +458,101 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     _timeToFirstFrame = win.getFutureFlipTime(clock="now")
     frameN = -1
     
-    # --- Run Routine "trial" ---
-    trial.forceEnded = routineForceEnded = not continueRoutine
-    while continueRoutine and routineTimer.getTime() < 120.0:
+    # --- Run Routine "calibration" ---
+    calibration.forceEnded = routineForceEnded = not continueRoutine
+    while continueRoutine and routineTimer.getTime() < 30.0:
         # get current time
         t = routineTimer.getTime()
         tThisFlip = win.getFutureFlipTime(clock=routineTimer)
         tThisFlipGlobal = win.getFutureFlipTime(clock=None)
         frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
         # update/draw components on each frame
-        # *mouse* updates
+        # *mouse_2* updates
         
-        # if mouse is starting this frame...
-        if mouse.status == NOT_STARTED and t >= 0.0-frameTolerance:
+        # if mouse_2 is starting this frame...
+        if mouse_2.status == NOT_STARTED and t >= 0.0-frameTolerance:
             # keep track of start time/frame for later
-            mouse.frameNStart = frameN  # exact frame index
-            mouse.tStart = t  # local t and not account for scr refresh
-            mouse.tStartRefresh = tThisFlipGlobal  # on global time
-            win.timeOnFlip(mouse, 'tStartRefresh')  # time at next scr refresh
+            mouse_2.frameNStart = frameN  # exact frame index
+            mouse_2.tStart = t  # local t and not account for scr refresh
+            mouse_2.tStartRefresh = tThisFlipGlobal  # on global time
+            win.timeOnFlip(mouse_2, 'tStartRefresh')  # time at next scr refresh
             # add timestamp to datafile
-            thisExp.addData('mouse.started', t)
+            thisExp.addData('mouse_2.started', t)
             # update status
-            mouse.status = STARTED
-            mouse.mouseClock.reset()
-            prevButtonState = mouse.getPressed()  # if button is down already this ISN'T a new click
+            mouse_2.status = STARTED
+            mouse_2.mouseClock.reset()
+            prevButtonState = mouse_2.getPressed()  # if button is down already this ISN'T a new click
         
-        # if mouse is stopping this frame...
-        if mouse.status == STARTED:
+        # if mouse_2 is stopping this frame...
+        if mouse_2.status == STARTED:
             # is it time to stop? (based on global clock, using actual start)
-            if tThisFlipGlobal > mouse.tStartRefresh + 120-frameTolerance:
+            if tThisFlipGlobal > mouse_2.tStartRefresh + 30-frameTolerance:
                 # keep track of stop time/frame for later
-                mouse.tStop = t  # not accounting for scr refresh
-                mouse.tStopRefresh = tThisFlipGlobal  # on global time
-                mouse.frameNStop = frameN  # exact frame index
+                mouse_2.tStop = t  # not accounting for scr refresh
+                mouse_2.tStopRefresh = tThisFlipGlobal  # on global time
+                mouse_2.frameNStop = frameN  # exact frame index
                 # add timestamp to datafile
-                thisExp.addData('mouse.stopped', t)
+                thisExp.addData('mouse_2.stopped', t)
                 # update status
-                mouse.status = FINISHED
-        if mouse.status == STARTED:  # only update if started and not finished!
-            x, y = mouse.getPos()
-            mouse.x.append(x)
-            mouse.y.append(y)
-            buttons = mouse.getPressed()
-            mouse.leftButton.append(buttons[0])
-            mouse.midButton.append(buttons[1])
-            mouse.rightButton.append(buttons[2])
-            mouse.time.append(mouse.mouseClock.getTime())
+                mouse_2.status = FINISHED
+        if mouse_2.status == STARTED:  # only update if started and not finished!
+            buttons = mouse_2.getPressed()
+            if buttons != prevButtonState:  # button state changed?
+                prevButtonState = buttons
+                if sum(buttons) > 0:  # state changed to a new click
+                    # check whether click was in correct object
+                    if gotValidClick:
+                        _corr = 0
+                        _corrAns = environmenttools.getFromNames(polygon_2, namespace=locals())
+                        for obj in _corrAns:
+                            # is this object clicked on?
+                            if obj.contains(mouse_2):
+                                _corr = 1
+                        mouse_2.corr.append(_corr)
+                    x, y = mouse_2.getPos()
+                    mouse_2.x.append(x)
+                    mouse_2.y.append(y)
+                    buttons = mouse_2.getPressed()
+                    mouse_2.leftButton.append(buttons[0])
+                    mouse_2.midButton.append(buttons[1])
+                    mouse_2.rightButton.append(buttons[2])
+                    mouse_2.time.append(mouse_2.mouseClock.getTime())
+                    
+                    continueRoutine = False  # end routine on response
         
-        # *grating* updates
+        # *polygon_2* updates
         
-        # if grating is starting this frame...
-        if grating.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+        # if polygon_2 is starting this frame...
+        if polygon_2.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
             # keep track of start time/frame for later
-            grating.frameNStart = frameN  # exact frame index
-            grating.tStart = t  # local t and not account for scr refresh
-            grating.tStartRefresh = tThisFlipGlobal  # on global time
-            win.timeOnFlip(grating, 'tStartRefresh')  # time at next scr refresh
+            polygon_2.frameNStart = frameN  # exact frame index
+            polygon_2.tStart = t  # local t and not account for scr refresh
+            polygon_2.tStartRefresh = tThisFlipGlobal  # on global time
+            win.timeOnFlip(polygon_2, 'tStartRefresh')  # time at next scr refresh
             # add timestamp to datafile
-            thisExp.timestampOnFlip(win, 'grating.started')
+            thisExp.timestampOnFlip(win, 'polygon_2.started')
             # update status
-            grating.status = STARTED
-            grating.setAutoDraw(True)
+            polygon_2.status = STARTED
+            polygon_2.setAutoDraw(True)
         
-        # if grating is active this frame...
-        if grating.status == STARTED:
+        # if polygon_2 is active this frame...
+        if polygon_2.status == STARTED:
             # update params
-            grating.setPos(pos, log=False)
+            pass
         
-        # if grating is stopping this frame...
-        if grating.status == STARTED:
+        # if polygon_2 is stopping this frame...
+        if polygon_2.status == STARTED:
             # is it time to stop? (based on global clock, using actual start)
-            if tThisFlipGlobal > grating.tStartRefresh + 120-frameTolerance:
+            if tThisFlipGlobal > polygon_2.tStartRefresh + 30-frameTolerance:
                 # keep track of stop time/frame for later
-                grating.tStop = t  # not accounting for scr refresh
-                grating.tStopRefresh = tThisFlipGlobal  # on global time
-                grating.frameNStop = frameN  # exact frame index
+                polygon_2.tStop = t  # not accounting for scr refresh
+                polygon_2.tStopRefresh = tThisFlipGlobal  # on global time
+                polygon_2.frameNStop = frameN  # exact frame index
                 # add timestamp to datafile
-                thisExp.timestampOnFlip(win, 'grating.stopped')
+                thisExp.timestampOnFlip(win, 'polygon_2.stopped')
                 # update status
-                grating.status = FINISHED
-                grating.setAutoDraw(False)
-        # Run 'Each Frame' code from code
-        posx = posx + numpy.random.normal(loc=0,scale = 1,size = 1)
-        posy = posy + numpy.random.normal(loc=0,scale = 1,size = 1)
-        pos = (posx, posy)
+                polygon_2.status = FINISHED
+                polygon_2.setAutoDraw(False)
         
         # check for quit (typically the Esc key)
         if defaultKeyboard.getKeys(keyList=["escape"]):
@@ -548,10 +573,10 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         
         # check if all components have finished
         if not continueRoutine:  # a component has requested a forced-end of Routine
-            trial.forceEnded = routineForceEnded = True
+            calibration.forceEnded = routineForceEnded = True
             break
         continueRoutine = False  # will revert to True if at least one component still running
-        for thisComponent in trial.components:
+        for thisComponent in calibration.components:
             if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
                 continueRoutine = True
                 break  # at least one component has not yet finished
@@ -560,29 +585,267 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
             win.flip()
     
-    # --- Ending Routine "trial" ---
-    for thisComponent in trial.components:
+    # --- Ending Routine "calibration" ---
+    for thisComponent in calibration.components:
         if hasattr(thisComponent, "setAutoDraw"):
             thisComponent.setAutoDraw(False)
-    # store stop times for trial
-    trial.tStop = globalClock.getTime(format='float')
-    trial.tStopRefresh = tThisFlipGlobal
-    thisExp.addData('trial.stopped', trial.tStop)
+    # store stop times for calibration
+    calibration.tStop = globalClock.getTime(format='float')
+    calibration.tStopRefresh = tThisFlipGlobal
+    thisExp.addData('calibration.stopped', calibration.tStop)
     # store data for thisExp (ExperimentHandler)
-    thisExp.addData('mouse.x', mouse.x)
-    thisExp.addData('mouse.y', mouse.y)
-    thisExp.addData('mouse.leftButton', mouse.leftButton)
-    thisExp.addData('mouse.midButton', mouse.midButton)
-    thisExp.addData('mouse.rightButton', mouse.rightButton)
-    thisExp.addData('mouse.time', mouse.time)
+    thisExp.addData('mouse_2.x', mouse_2.x)
+    thisExp.addData('mouse_2.y', mouse_2.y)
+    thisExp.addData('mouse_2.leftButton', mouse_2.leftButton)
+    thisExp.addData('mouse_2.midButton', mouse_2.midButton)
+    thisExp.addData('mouse_2.rightButton', mouse_2.rightButton)
+    thisExp.addData('mouse_2.time', mouse_2.time)
+    thisExp.addData('mouse_2.corr', mouse_2.corr)
     # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
-    if trial.maxDurationReached:
-        routineTimer.addTime(-trial.maxDuration)
-    elif trial.forceEnded:
+    if calibration.maxDurationReached:
+        routineTimer.addTime(-calibration.maxDuration)
+    elif calibration.forceEnded:
         routineTimer.reset()
     else:
-        routineTimer.addTime(-120.000000)
+        routineTimer.addTime(-30.000000)
     thisExp.nextEntry()
+    
+    # set up handler to look after randomisation of conditions etc
+    trials = data.TrialHandler2(
+        name='trials',
+        nReps=2.0, 
+        method='random', 
+        extraInfo=expInfo, 
+        originPath=-1, 
+        trialList=[None], 
+        seed=None, 
+    )
+    thisExp.addLoop(trials)  # add the loop to the experiment
+    thisTrial = trials.trialList[0]  # so we can initialise stimuli with some values
+    # abbreviate parameter names if possible (e.g. rgb = thisTrial.rgb)
+    if thisTrial != None:
+        for paramName in thisTrial:
+            globals()[paramName] = thisTrial[paramName]
+    if thisSession is not None:
+        # if running in a Session with a Liaison client, send data up to now
+        thisSession.sendExperimentData()
+    
+    for thisTrial in trials:
+        currentLoop = trials
+        thisExp.timestampOnFlip(win, 'thisRow.t', format=globalClock.format)
+        if thisSession is not None:
+            # if running in a Session with a Liaison client, send data up to now
+            thisSession.sendExperimentData()
+        # abbreviate parameter names if possible (e.g. rgb = thisTrial.rgb)
+        if thisTrial != None:
+            for paramName in thisTrial:
+                globals()[paramName] = thisTrial[paramName]
+        
+        # --- Prepare to start Routine "trial" ---
+        # create an object to store info about Routine trial
+        trial = data.Routine(
+            name='trial',
+            components=[mouse, polygon],
+        )
+        trial.status = NOT_STARTED
+        continueRoutine = True
+        # update component parameters for each repeat
+        # setup some python lists for storing info about the mouse
+        gotValidClick = False  # until a click is received
+        polygon.setOpacity(opacity)
+        # Run 'Begin Routine' code from code
+        #set the initial position of the dot in the beginning
+        #of each run
+        posx = 0
+        posy = 0
+        pos = (posx, posy)
+        
+        #change opacity from the one we ran first to the other one
+        if opacity == 0.03:
+            opacity = 1
+        else:
+            opacity = 0.03
+        
+        #Save the time in the beginning of each condition
+        #so we know how long it's been running
+        start = time.time()
+        # store start times for trial
+        trial.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
+        trial.tStart = globalClock.getTime(format='float')
+        trial.status = STARTED
+        thisExp.addData('trial.started', trial.tStart)
+        trial.maxDuration = 120
+        # keep track of which components have finished
+        trialComponents = trial.components
+        for thisComponent in trial.components:
+            thisComponent.tStart = None
+            thisComponent.tStop = None
+            thisComponent.tStartRefresh = None
+            thisComponent.tStopRefresh = None
+            if hasattr(thisComponent, 'status'):
+                thisComponent.status = NOT_STARTED
+        # reset timers
+        t = 0
+        _timeToFirstFrame = win.getFutureFlipTime(clock="now")
+        frameN = -1
+        
+        # --- Run Routine "trial" ---
+        # if trial has changed, end Routine now
+        if isinstance(trials, data.TrialHandler2) and thisTrial.thisN != trials.thisTrial.thisN:
+            continueRoutine = False
+        trial.forceEnded = routineForceEnded = not continueRoutine
+        while continueRoutine and routineTimer.getTime() < 120.0:
+            # get current time
+            t = routineTimer.getTime()
+            tThisFlip = win.getFutureFlipTime(clock=routineTimer)
+            tThisFlipGlobal = win.getFutureFlipTime(clock=None)
+            frameN = frameN + 1  # number of completed frames (so 0 is the first frame)
+            # update/draw components on each frame
+            # is it time to end the Routine? (based on local clock)
+            if tThisFlip > trial.maxDuration-frameTolerance:
+                trial.maxDurationReached = True
+                continueRoutine = False
+            # *mouse* updates
+            
+            # if mouse is starting this frame...
+            if mouse.status == NOT_STARTED and t >= 0.0-frameTolerance:
+                # keep track of start time/frame for later
+                mouse.frameNStart = frameN  # exact frame index
+                mouse.tStart = t  # local t and not account for scr refresh
+                mouse.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(mouse, 'tStartRefresh')  # time at next scr refresh
+                # add timestamp to datafile
+                thisExp.addData('mouse.started', t)
+                # update status
+                mouse.status = STARTED
+                prevButtonState = mouse.getPressed()  # if button is down already this ISN'T a new click
+            
+            # if mouse is stopping this frame...
+            if mouse.status == STARTED:
+                # is it time to stop? (based on global clock, using actual start)
+                if tThisFlipGlobal > mouse.tStartRefresh + 120-frameTolerance:
+                    # keep track of stop time/frame for later
+                    mouse.tStop = t  # not accounting for scr refresh
+                    mouse.tStopRefresh = tThisFlipGlobal  # on global time
+                    mouse.frameNStop = frameN  # exact frame index
+                    # add timestamp to datafile
+                    thisExp.addData('mouse.stopped', t)
+                    # update status
+                    mouse.status = FINISHED
+            
+            # *polygon* updates
+            
+            # if polygon is starting this frame...
+            if polygon.status == NOT_STARTED and tThisFlip >= 0.0-frameTolerance:
+                # keep track of start time/frame for later
+                polygon.frameNStart = frameN  # exact frame index
+                polygon.tStart = t  # local t and not account for scr refresh
+                polygon.tStartRefresh = tThisFlipGlobal  # on global time
+                win.timeOnFlip(polygon, 'tStartRefresh')  # time at next scr refresh
+                # add timestamp to datafile
+                thisExp.timestampOnFlip(win, 'polygon.started')
+                # update status
+                polygon.status = STARTED
+                polygon.setAutoDraw(True)
+            
+            # if polygon is active this frame...
+            if polygon.status == STARTED:
+                # update params
+                polygon.setPos(pos, log=False)
+            
+            # if polygon is stopping this frame...
+            if polygon.status == STARTED:
+                # is it time to stop? (based on global clock, using actual start)
+                if tThisFlipGlobal > polygon.tStartRefresh + 120-frameTolerance:
+                    # keep track of stop time/frame for later
+                    polygon.tStop = t  # not accounting for scr refresh
+                    polygon.tStopRefresh = tThisFlipGlobal  # on global time
+                    polygon.frameNStop = frameN  # exact frame index
+                    # add timestamp to datafile
+                    thisExp.timestampOnFlip(win, 'polygon.stopped')
+                    # update status
+                    polygon.status = FINISHED
+                    polygon.setAutoDraw(False)
+            # Run 'Each Frame' code from code
+            if time.time() - start > 3: #start moving the dot only after 3 seconds
+            
+                #draw the next step for the random walk for x and y directions
+                Addx = numpy.random.normal(loc=0,scale = 0.3)
+                Addy = numpy.random.normal(loc=0,scale = 0.3)
+            
+                #add the next step to the current position,
+                #but make sure we don't go off screen (set at +- 6cm from middle of screen)
+                if posx + Addx < 6 and posx + Addx > -6:
+                    posx = posx + Addx
+                        
+                if posy + Addy < 6 and posy + Addy > -6:
+                    posy = posy + Addy
+                    
+                pos = (posx, posy)
+                
+                #save the relevant data on each frame
+                thisExp.addData("time_in_run", time.time() - start)
+                thisExp.addData("x_coord_mouse", mouse.getPos()[0])
+                thisExp.addData("y_coord_mouse", mouse.getPos()[1])
+                thisExp.addData("x_coord_target", posx)
+                thisExp.addData("y_coord_target", posy)
+                thisExp.addData("opacity", opacity)
+                thisExp.nextEntry()
+            
+            # check for quit (typically the Esc key)
+            if defaultKeyboard.getKeys(keyList=["escape"]):
+                thisExp.status = FINISHED
+            if thisExp.status == FINISHED or endExpNow:
+                endExperiment(thisExp, win=win)
+                return
+            # pause experiment here if requested
+            if thisExp.status == PAUSED:
+                pauseExperiment(
+                    thisExp=thisExp, 
+                    win=win, 
+                    timers=[routineTimer], 
+                    playbackComponents=[]
+                )
+                # skip the frame we paused on
+                continue
+            
+            # check if all components have finished
+            if not continueRoutine:  # a component has requested a forced-end of Routine
+                trial.forceEnded = routineForceEnded = True
+                break
+            continueRoutine = False  # will revert to True if at least one component still running
+            for thisComponent in trial.components:
+                if hasattr(thisComponent, "status") and thisComponent.status != FINISHED:
+                    continueRoutine = True
+                    break  # at least one component has not yet finished
+            
+            # refresh the screen
+            if continueRoutine:  # don't flip if this routine is over or we'll get a blank screen
+                win.flip()
+        
+        # --- Ending Routine "trial" ---
+        for thisComponent in trial.components:
+            if hasattr(thisComponent, "setAutoDraw"):
+                thisComponent.setAutoDraw(False)
+        # store stop times for trial
+        trial.tStop = globalClock.getTime(format='float')
+        trial.tStopRefresh = tThisFlipGlobal
+        thisExp.addData('trial.stopped', trial.tStop)
+        # store data for trials (TrialHandler)
+        # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
+        if trial.maxDurationReached:
+            routineTimer.addTime(-trial.maxDuration)
+        elif trial.forceEnded:
+            routineTimer.reset()
+        else:
+            routineTimer.addTime(-120.000000)
+        thisExp.nextEntry()
+        
+    # completed 2.0 repeats of 'trials'
+    
+    if thisSession is not None:
+        # if running in a Session with a Liaison client, send data up to now
+        thisSession.sendExperimentData()
     
     # mark experiment as finished
     endExperiment(thisExp, win=win)

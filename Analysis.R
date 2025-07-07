@@ -1,3 +1,5 @@
+#install.packages(c("dplyr", "ggplot2", "cowplot", "ggdist"))
+
 require(dplyr)
 require(ggplot2)
 require(cowplot)
@@ -23,12 +25,21 @@ for (i in flist){
 
 Responses_Wide = Responses_Wide %>%
   #transform recorded mouse data into same unit as displayed polygon (cm from center of screen)
-                      mutate(mouse_2.x = as.numeric(substr(mouse_2.x[1], 2, 7)),
-                             mouse_2.y = as.numeric(substr(mouse_2.y[1], 2, 7)),
+                      mutate(mouse_2.x = as.numeric(substr(mouse_2.x[1], 2, 6)),
+                             mouse_2.y = as.numeric(substr(mouse_2.y[1], 2, 6)),
                              mouse_x_cm = x_coord_mouse*(1/mouse_2.x),
-                             mouse_y_cm = y_coord_mouse*(1/mouse_2.y)) %>% 
+                             mouse_y_cm = y_coord_mouse*(1/mouse_2.y),
+                             
+                             mouse_speed.x = (mouse_x_cm-lag(mouse_x_cm))/(Responses_Wide$time_in_run - 
+                                                                             lag(Responses_Wide$time_in_run, 1)),
+                             mouse_speed.y = (mouse_y_cm-lag(mouse_y_cm))/(Responses_Wide$time_in_run - 
+                                                                             lag(Responses_Wide$time_in_run, 1)),
+                             target_speed.x = (x_coord_target-lag(x_coord_target))/(Responses_Wide$time_in_run - 
+                                                                             lag(Responses_Wide$time_in_run, 1)),
+                             target_speed.y = (y_coord_target-lag(y_coord_target))/(Responses_Wide$time_in_run - 
+                                                                             lag(Responses_Wide$time_in_run, 1))) %>%
   
-  #filter out rows with no data (because PsychoPy .csv files can look a little messy)
+  #filter out rows with no data (because PsychoPy .csv files be a little messy otherwise)
                       filter(!is.na(opacity)) %>% 
                       group_by(participant) %>%
   
@@ -74,31 +85,55 @@ CCG_Frame = data.frame()
 for (i in seq(1,HowManyFrames,4)){
   CCG_Frame = rbind(CCG_Frame, Responses_Wide %>%
                       ungroup() %>%
-                      select(participant,opacity,x_coord_target,mouse_x_cm,y_coord_target,FrameDuration,mouse_y_cm) %>%
+                      select(participant,opacity,x_coord_target,mouse_x_cm,
+                             y_coord_target,FrameDuration,mouse_y_cm, 
+                             mouse_speed.x, mouse_speed.y, target_speed.x, target_speed.y) %>%
                       group_by(participant, opacity) %>%
                       mutate(x_coord_target_lagged = lag(x_coord_target, i),
                              y_coord_target_lagged = lag(y_coord_target, i),
+                             
+                             target_speed.x_lagged = lag(target_speed.x, i),
+                             target_speed.y_lagged = lag(target_speed.y, i),
+                             
                              lag = i))
 }
 
+CCG_Frame %>% filter(opacity == 0.05 & lag == 1)
 
 CCG_Frame = CCG_Frame %>%
   group_by(participant, opacity, lag) %>%
   
-  #Calculate the correlation between target and response positons for each lag
+  #Calculate the correlation between target and response positions for each lag
   #(separately per participant and condition and also separately for x/y directions)
   mutate(Correlation_x = cor.test(mouse_x_cm, x_coord_target_lagged)[4]$estimate[[1]],
-         Correlation_y = cor.test(mouse_y_cm, y_coord_target_lagged)[4]$estimate[[1]]) %>% 
+         Correlation_y = cor.test(mouse_y_cm, y_coord_target_lagged)[4]$estimate[[1]],
+         
+         Correlation_x_Speed = cor.test(mouse_speed.x, target_speed.x_lagged)[4]$estimate[[1]],
+         Correlation_y_Speed = cor.test(mouse_speed.y, target_speed.y_lagged)[4]$estimate[[1]],
+         Correlation_Overall_Speed = (Correlation_x_Speed + Correlation_y_Speed)/2) %>% 
   group_by(participant, opacity) %>%
   
   #get the maximum correlation and the lag at which this maximum correlation is located
   mutate(MaxCorr_x = max(Correlation_x),
          Time_MaxCorr_x = lag[which.max(Correlation_x)],
          MaxCorr_y = max(Correlation_y),
-         Time_MaxCorr_y = lag[which.max(Correlation_y)])
+         Time_MaxCorr_y = lag[which.max(Correlation_y)],
+         
+         MaxCorr_Speed_x = max(Correlation_x_Speed),
+         Time_MaxCorr_Speed_x = lag[which.max(Correlation_x)],
+         MaxCorr_Speed_y = max(Correlation_y_Speed),
+         Time_MaxCorr_Speed_y = lag[which.max(Correlation_y)],
+         
+  #take the average maximum correlation and time lag across x and y directions
+         MaxCorr_Overall = (MaxCorr_x + MaxCorr_y)/2,
+         Time_MaxCorr_Overall = (Time_MaxCorr_x+Time_MaxCorr_y)/2,
+  
+         MaxCorr_Overall_Speed = max(Correlation_Overall_Speed),
+         Time_MaxCorr_Overall_Speed = lag[which.max(Correlation_Overall_Speed)]
+  )
 
-save(CCG_Frame, file = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/SavedVariables/CCG_Frame.RData"))
-load(file = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/SavedVariables/CCG_Frame.RData"))
+# save(CCG_Frame, file = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/SavedVariables/CCG_Frame.RData"))
+# load(file = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/SavedVariables/CCG_Frame.RData"))
 
 #########################
 #Cross Correlation Plots#
@@ -131,31 +166,46 @@ ggplot(CCG_Frame %>%
         axis.text = element_text(size=18),
         strip.text = element_text(size = 18))
 
+ggplot(CCG_Frame %>% 
+         group_by(participant,opacity,lag) %>% 
+         slice(1),
+       aes(lag*FrameDuration,Correlation_Overall_Speed)) +
+  geom_line(linewidth = 2) +
+  xlab("Lag (s)") + 
+  ylab("Correlation") +
+  facet_grid(participant ~ opacity) +
+  geom_vline(aes(xintercept = Time_MaxCorr_Overall_Speed*FrameDuration)) +
+  geom_hline(aes(yintercept = MaxCorr_Overall_Speed), linetype = 2, linewidth = 1.5) +
+  theme(axis.title=element_text(size=18),
+        axis.text = element_text(size=18),
+        strip.text = element_text(size = 18))
+
 ##################
 #Outlier Analysis#
 ##################
-
 #get those conditions (per participant) where the best lag is at the lower or the upper end of the interval of time lags
 Outliers = unique((CCG_Frame %>% group_by(participant, opacity) %>%
                      slice(1) %>%
-                     select(participant, opacity, Time_MaxCorr_x, Time_MaxCorr_y, FrameDuration) %>%
-                     filter(Time_MaxCorr_x*FrameDuration > 0.98 | Time_MaxCorr_x*FrameDuration > 0.98 | 
-                            Time_MaxCorr_y*FrameDuration < 0.02 | Time_MaxCorr_y*FrameDuration < 0.02))$participant)
+                     select(participant, opacity, Time_MaxCorr_Overall_Speed, FrameDuration) %>%
+                     # filter(Time_MaxCorr_x*FrameDuration > 0.98 | Time_MaxCorr_x*FrameDuration > 0.98 | 
+                     #        Time_MaxCorr_y*FrameDuration < 0.02 | Time_MaxCorr_y*FrameDuration < 0.02))$participant)
+                     filter(Time_MaxCorr_Overall_Speed*FrameDuration > 0.98 | 
+                            Time_MaxCorr_Overall_Speed*FrameDuration < 0.02))$participant)
 
 ###############
 #Summary Plots#
 ###############
 require(ggdist)
 
-#Time // x
+#Time
 ggplot(CCG_Frame %>%
          filter(!(participant %in% Outliers)) %>% 
          group_by(participant,opacity) %>%
          slice(1) %>%
          group_by(opacity) %>%
-         mutate(Mean = mean(Time_MaxCorr_x),
-                SD = sd(Time_MaxCorr_x)), 
-       aes(as.factor(opacity),Time_MaxCorr_x*FrameDuration)) +
+         mutate(Mean = mean(Time_MaxCorr_Overall_Speed),
+                SD = sd(Time_MaxCorr_Overall_Speed)), 
+       aes(as.factor(opacity),Time_MaxCorr_Overall_Speed*FrameDuration)) +
   geom_point(aes(as.factor(opacity),Mean*FrameDuration), position = position_dodge(width = 0.2), size = 5) +
   geom_errorbar(aes(ymin = Mean*FrameDuration-SD*FrameDuration, 
                     ymax = Mean*FrameDuration+SD*FrameDuration), position = position_dodge(width = 0.2), width = 0.2, linewidth = 1.5) +
@@ -167,15 +217,35 @@ ggplot(CCG_Frame %>%
   ylab("Time Lag of Maximum Correlation (s)") +
   scale_x_discrete(name = "Opacity")
 
-#Time // y
+#maximum correlation
 ggplot(CCG_Frame %>%
          filter(!(participant %in% Outliers)) %>% 
          group_by(participant,opacity) %>%
          slice(1) %>%
          group_by(opacity) %>%
-         mutate(Mean = mean(Time_MaxCorr_y),
-                SD = sd(Time_MaxCorr_y)), 
-       aes(as.factor(opacity),Time_MaxCorr_y*FrameDuration)) +
+         mutate(Mean = mean(MaxCorr_Overall_Speed),
+                SD = sd(MaxCorr_Overall_Speed)), 
+       aes(as.factor(opacity),MaxCorr_Overall_Speed)) +
+  geom_point(aes(as.factor(opacity),Mean), position = position_dodge(width = 0.2), size = 5) +
+  geom_errorbar(aes(ymin = Mean-SD, 
+                    ymax = Mean+SD), position = position_dodge(width = 0.2), width = 0.2, linewidth = 1.5) +
+  stat_dots(side = "right", justification = -0.2, size = 2, alpha = 0.33) +
+  theme(axis.text=element_text(size=18),
+        axis.title.y = element_text(size=18),
+        axis.title = element_text(size=18),
+        legend.text = element_text(size=18)) +
+  ylab("Maximum Correlation") +
+  scale_x_discrete(name = "Opacity")
+
+#Time
+ggplot(CCG_Frame %>%
+         filter(!(participant %in% Outliers)) %>% 
+         group_by(participant,opacity) %>%
+         slice(1) %>%
+         group_by(opacity) %>%
+         mutate(Mean = mean(Time_MaxCorr_Overall),
+                SD = sd(Time_MaxCorr_Overall)), 
+       aes(as.factor(opacity),Time_MaxCorr_Overall*FrameDuration)) +
   geom_point(aes(as.factor(opacity),Mean*FrameDuration), position = position_dodge(width = 0.2), size = 5) +
   geom_errorbar(aes(ymin = Mean*FrameDuration-SD*FrameDuration, 
                     ymax = Mean*FrameDuration+SD*FrameDuration), position = position_dodge(width = 0.2), width = 0.2, linewidth = 1.5) +
@@ -187,15 +257,15 @@ ggplot(CCG_Frame %>%
   ylab("Time Lag of Maximum Correlation (s)") +
   scale_x_discrete(name = "Opacity")
 
-#maximum correlation // x
+#maximum correlation
 ggplot(CCG_Frame %>%
          filter(!(participant %in% Outliers)) %>% 
          group_by(participant,opacity) %>%
          slice(1) %>%
          group_by(opacity) %>%
-         mutate(Mean = mean(MaxCorr_x),
-                SD = sd(MaxCorr_x)), 
-       aes(as.factor(opacity),MaxCorr_x)) +
+         mutate(Mean = mean(MaxCorr_Overall),
+                SD = sd(MaxCorr_Overall)), 
+       aes(as.factor(opacity),MaxCorr_Overall)) +
   geom_point(aes(as.factor(opacity),Mean), position = position_dodge(width = 0.2), size = 5) +
   geom_errorbar(aes(ymin = Mean-SD, 
                     ymax = Mean+SD), position = position_dodge(width = 0.2), width = 0.2, linewidth = 1.5) +
@@ -204,27 +274,7 @@ ggplot(CCG_Frame %>%
         axis.title.y = element_text(size=18),
         axis.title = element_text(size=18),
         legend.text = element_text(size=18)) +
-  ylab("Time Lag of Maximum Correlation (s)") +
-  scale_x_discrete(name = "Opacity")
-
-#maximum correlation // y
-ggplot(CCG_Frame %>%
-         filter(!(participant %in% Outliers)) %>% 
-         group_by(participant,opacity) %>%
-         slice(1) %>%
-         group_by(opacity) %>%
-         mutate(Mean = mean(MaxCorr_y),
-                SD = sd(MaxCorr_y)), 
-       aes(as.factor(opacity),MaxCorr_y)) +
-  geom_point(aes(as.factor(opacity),Mean), position = position_dodge(width = 0.2), size = 5) +
-  geom_errorbar(aes(ymin = Mean-SD, 
-                    ymax = Mean+SD), position = position_dodge(width = 0.2), width = 0.2, linewidth = 1.5) +
-  stat_dots(side = "right", justification = -0.2, size = 2, alpha = 0.33) +
-  theme(axis.text=element_text(size=18),
-        axis.title.y = element_text(size=18),
-        axis.title = element_text(size=18),
-        legend.text = element_text(size=18)) +
-  ylab("Time Lag of Maximum Correlation (s)") +
+  ylab("Maximum Correlation") +
   scale_x_discrete(name = "Opacity")
 
 ###############
@@ -234,50 +284,39 @@ ggplot(CCG_Frame %>%
 #####Kalman filter (as per Bonnen 2015)
 KalmanFilter = function(R){
   
-  BestLag = round(0.3/FrameDuration) #pick a reasonable-ish lag
-  
   Responses_Wide_Frame_Temp = Responses_Wide %>% filter(participant == j & opacity == k)
-
+  BestLag = round(0.3/Responses_Wide_Frame_Temp$FrameDuration[1]) #pick a reasonable-ish lag
+  
   #x
   x_t.x = lag(Responses_Wide_Frame_Temp$x_coord_target,BestLag)
-  x_hat_t.x = Responses_Wide_Frame_Temp$x_coord_mouse
-  x_t_plus_1.x = x_t.x    #angle on next step
-  v_t.x = rnorm(length(x_t.x),0,R)    #v_t is noise is perceived angle
-  y_t.x = lag(x_t.x,1) + v_t.x    #y_t is perceived angle (actual angle + noise)
-  
+  x_hat_t.x = Responses_Wide_Frame_Temp$mouse_x_cm
   #y
   x_t.y = lag(Responses_Wide_Frame_Temp$y_coord_target,BestLag)
-  x_hat_t.y = Responses_Wide_Frame_Temp$y_coord_mouse
-  x_t_plus_1.x = x_t.x    #angle on next step
-  v_t.x = rnorm(length(x_t.x),0,R)    #v_t is noise is perceived angle
-  y_t.x = lag(x_t.x,1) + v_t.x    #y_t is perceived angle (actual angle + noise)
+  x_hat_t.y = Responses_Wide_Frame_Temp$mouse_y_cm
   
-  #Updating fraction
-  Q = 0.3^2 #Q is actual variability in angle (as variance, that's why we square it)
-  P = Q/2*((1+4*R/Q)^0.5 - 1) #posterior variance
-  K_t = (Q + P)/(Q + P + R) #Kalman gain, used to update the old angle by a percentage of the new perceived angle
+  Q = 0.3^2 #variance (in stimulus change), not standard deviation
+  P <- Q / 2 * (sqrt(1 + 4 * R / Q) - 1)  #posterior variance
+  K <- (P + Q)/(P + Q + R)  #Kalman Gain
   
-  #as per Bonnen 2015, the error between predicted and observed values should come from a normal distribution within mean = 0 and sd = K^2 * R
-  #x
-  Errors.x = x_hat_t.x - K_t*x_t.x
-  #y
-  Errors.y = x_hat_t.y - K_t*x_t.y
+  # compute residual; in Bonnen 2015's script, this is d, 
+  #but whenever you print d to console, it is a vector of N times K. So - simplified. 
+  #I am assuming this is because matlab just really loves matrices
+  temp.x <- x_hat_t.x - K * x_t.x  
+  temp.x = temp.x[!is.na(temp.x)] #remove those residuals that come out as NA
+  temp.y <- x_hat_t.y - K * x_t.y
+  temp.y = temp.y[!is.na(temp.y)] #remove those residuals that come out as NA
   
-  #Get the log likelihood that the observed errors come from this distribution
-  #x
-  Likelihood.x = log(dnorm(Errors.x, 0, K_t^2 * R))
-  #y
-  Likelihood.y = log(dnorm(Errors.y, 0, K_t^2 * R))
+  temp = c(temp.x, temp.y)
   
-  #combine errors from x and y
-  Likelihood = c(Likelihood.x, Likelihood.y)
-  
-  #Sometimes the values are so likely that R gives us "-Inf" as output.
-  #We just crudely substitute those with -500, which is smaller than the smallest log likelihood we can get from R
-  Likelihood[Likelihood == -Inf] = -500
-  
-  #sum up the negative log likelihoods
-  -sum(Likelihood, na.rm = TRUE)
+  N = length(temp)
+  nLL = - (-1/(2*(K^2)*R)*sum(temp^2) - N/2*log(R) - N*log(K))
+
+  # #get the negative log likelihood that the residuals (temp) are from a normal distribution with a mean of 0 and a standard deviation of K^2*R
+  # nLL = -sum(LogProb)
+  nLL
+  # 
+  # nLL = -sum(log(dnorm(temp, 0, K^2*R))) #get the negative log likelihood that the residuals (temp) are from a normal distribution with a mean of 0 and a standard deviation of K^2*R
+  # nLL
 }
 
 #Optimize for each condition per participant
@@ -289,7 +328,7 @@ for (j in unique((Responses_Wide$participant))){
     print(k)
     
     #keep in mind that R is the VARIANCE
-    MLE_Result = stats4::mle(KalmanFilter, start = list(R=1), lower = 0, upper = 3, method = "Brent")
+    MLE_Result = stats4::mle(KalmanFilter, start = list(R=0.3^2), lower = 0.005, upper = 10000, method = "Brent")
     
     OptimResults = rbind(OptimResults,
                          data.frame(participant = j,

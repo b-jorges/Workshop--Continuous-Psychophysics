@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2024.2.4),
-    on June 22, 2025, at 16:54
+    on July 07, 2025, at 04:11
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -129,7 +129,7 @@ def setupData(expInfo, dataDir=None):
     thisExp = data.ExperimentHandler(
         name=expName, version='',
         extraInfo=expInfo, runtimeInfo=None,
-        originPath='C:\\Users\\lab\\Desktop\\Workshop Continous Psychophysics\\Experiment\\ContPsyTracking\\ContPsyTracking_lastrun.py',
+        originPath='C:\\Users\\lab\\Documents\\GitHub\\Workshop--Continuous-Psychophysics\\Experiment\\ContPsyTracking\\ContPsyTracking_lastrun.py',
         savePickle=True, saveWideText=True,
         dataFileName=dataDir + os.sep + filename, sortColumns='time'
     )
@@ -388,7 +388,8 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         colorSpace='rgb', lineColor='white', fillColor='white',
         opacity=1.0, depth=-1.0, interpolate=True)
     # Run 'Begin Experiment' code from code
-    a = [0.05,1]
+    #randomize which opacity we start with
+    a = [0.03,1]
     opacity = numpy.random.choice(a)
     
     # create some handy timers
@@ -653,15 +654,20 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         gotValidClick = False  # until a click is received
         polygon.setOpacity(opacity)
         # Run 'Begin Routine' code from code
+        #set the initial position of the dot in the beginning
+        #of each run
         posx = 0
         posy = 0
         pos = (posx, posy)
         
-        if opacity == 0.05:
+        #change opacity from the one we ran first to the other one
+        if opacity == 0.03:
             opacity = 1
         else:
-            opacity = 0.05
+            opacity = 0.03
         
+        #Save the time in the beginning of each condition
+        #so we know how long it's been running
         start = time.time()
         # store start times for trial
         trial.tStartRefresh = win.getFutureFlipTime(clock=globalClock)
@@ -761,11 +767,14 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
                     polygon.status = FINISHED
                     polygon.setAutoDraw(False)
             # Run 'Each Frame' code from code
-            if time.time() - start > 3:
+            if time.time() - start > 3: #start moving the dot only after 3 seconds
             
+                #draw the next step for the random walk for x and y directions
                 Addx = numpy.random.normal(loc=0,scale = 0.3)
                 Addy = numpy.random.normal(loc=0,scale = 0.3)
             
+                #add the next step to the current position,
+                #but make sure we don't go off screen (set at +- 6cm from middle of screen)
                 if posx + Addx < 6 and posx + Addx > -6:
                     posx = posx + Addx
                         
@@ -773,7 +782,8 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
                     posy = posy + Addy
                     
                 pos = (posx, posy)
-            
+                
+                #save the relevant data on each frame
                 thisExp.addData("time_in_run", time.time() - start)
                 thisExp.addData("x_coord_mouse", mouse.getPos()[0])
                 thisExp.addData("y_coord_mouse", mouse.getPos()[1])
