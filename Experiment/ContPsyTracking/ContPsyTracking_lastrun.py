@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2024.2.4),
-    on July 07, 2025, at 04:11
+    on July 08, 2025, at 00:30
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -660,12 +660,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         posy = 0
         pos = (posx, posy)
         
-        #change opacity from the one we ran first to the other one
-        if opacity == 0.03:
-            opacity = 1
-        else:
-            opacity = 0.03
-        
+        print(opacity)
         #Save the time in the beginning of each condition
         #so we know how long it's been running
         start = time.time()
@@ -674,7 +669,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         trial.tStart = globalClock.getTime(format='float')
         trial.status = STARTED
         thisExp.addData('trial.started', trial.tStart)
-        trial.maxDuration = 120
+        trial.maxDuration = 5
         # keep track of which components have finished
         trialComponents = trial.components
         for thisComponent in trial.components:
@@ -694,7 +689,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         if isinstance(trials, data.TrialHandler2) and thisTrial.thisN != trials.thisTrial.thisN:
             continueRoutine = False
         trial.forceEnded = routineForceEnded = not continueRoutine
-        while continueRoutine and routineTimer.getTime() < 120.0:
+        while continueRoutine and routineTimer.getTime() < 5.0:
             # get current time
             t = routineTimer.getTime()
             tThisFlip = win.getFutureFlipTime(clock=routineTimer)
@@ -783,6 +778,8 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
                     
                 pos = (posx, posy)
                 
+                print(opacity)
+                
                 #save the relevant data on each frame
                 thisExp.addData("time_in_run", time.time() - start)
                 thisExp.addData("x_coord_mouse", mouse.getPos()[0])
@@ -832,13 +829,19 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         trial.tStopRefresh = tThisFlipGlobal
         thisExp.addData('trial.stopped', trial.tStop)
         # store data for trials (TrialHandler)
+        # Run 'End Routine' code from code
+        #change opacity from the one we ran first to the other one
+        if opacity == 0.03:
+            opacity = 1
+        else:
+            opacity = 0.03
         # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
         if trial.maxDurationReached:
             routineTimer.addTime(-trial.maxDuration)
         elif trial.forceEnded:
             routineTimer.reset()
         else:
-            routineTimer.addTime(-120.000000)
+            routineTimer.addTime(-5.000000)
         thisExp.nextEntry()
         
     # completed 2.0 repeats of 'trials'
