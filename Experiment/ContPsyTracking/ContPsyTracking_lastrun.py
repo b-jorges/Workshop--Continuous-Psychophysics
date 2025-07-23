@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 This experiment was created using PsychoPy3 Experiment Builder (v2024.2.4),
-    on July 08, 2025, at 00:30
+    on July 17, 2025, at 13:31
 If you publish work using this script the most relevant publication is:
 
     Peirce J, Gray JR, Simpson S, MacAskill M, Höchenberger R, Sogo H, Kastman E, Lindeløv JK. (2019) 
@@ -460,7 +460,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     
     # --- Run Routine "calibration" ---
     calibration.forceEnded = routineForceEnded = not continueRoutine
-    while continueRoutine and routineTimer.getTime() < 30.0:
+    while continueRoutine:
         # get current time
         t = routineTimer.getTime()
         tThisFlip = win.getFutureFlipTime(clock=routineTimer)
@@ -482,19 +482,6 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
             mouse_2.status = STARTED
             mouse_2.mouseClock.reset()
             prevButtonState = mouse_2.getPressed()  # if button is down already this ISN'T a new click
-        
-        # if mouse_2 is stopping this frame...
-        if mouse_2.status == STARTED:
-            # is it time to stop? (based on global clock, using actual start)
-            if tThisFlipGlobal > mouse_2.tStartRefresh + 30-frameTolerance:
-                # keep track of stop time/frame for later
-                mouse_2.tStop = t  # not accounting for scr refresh
-                mouse_2.tStopRefresh = tThisFlipGlobal  # on global time
-                mouse_2.frameNStop = frameN  # exact frame index
-                # add timestamp to datafile
-                thisExp.addData('mouse_2.stopped', t)
-                # update status
-                mouse_2.status = FINISHED
         if mouse_2.status == STARTED:  # only update if started and not finished!
             buttons = mouse_2.getPressed()
             if buttons != prevButtonState:  # button state changed?
@@ -539,20 +526,6 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         if polygon_2.status == STARTED:
             # update params
             pass
-        
-        # if polygon_2 is stopping this frame...
-        if polygon_2.status == STARTED:
-            # is it time to stop? (based on global clock, using actual start)
-            if tThisFlipGlobal > polygon_2.tStartRefresh + 30-frameTolerance:
-                # keep track of stop time/frame for later
-                polygon_2.tStop = t  # not accounting for scr refresh
-                polygon_2.tStopRefresh = tThisFlipGlobal  # on global time
-                polygon_2.frameNStop = frameN  # exact frame index
-                # add timestamp to datafile
-                thisExp.timestampOnFlip(win, 'polygon_2.stopped')
-                # update status
-                polygon_2.status = FINISHED
-                polygon_2.setAutoDraw(False)
         
         # check for quit (typically the Esc key)
         if defaultKeyboard.getKeys(keyList=["escape"]):
@@ -601,14 +574,9 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
     thisExp.addData('mouse_2.rightButton', mouse_2.rightButton)
     thisExp.addData('mouse_2.time', mouse_2.time)
     thisExp.addData('mouse_2.corr', mouse_2.corr)
-    # using non-slip timing so subtract the expected duration of this Routine (unless ended on request)
-    if calibration.maxDurationReached:
-        routineTimer.addTime(-calibration.maxDuration)
-    elif calibration.forceEnded:
-        routineTimer.reset()
-    else:
-        routineTimer.addTime(-30.000000)
     thisExp.nextEntry()
+    # the Routine "calibration" was not non-slip safe, so reset the non-slip timer
+    routineTimer.reset()
     
     # set up handler to look after randomisation of conditions etc
     trials = data.TrialHandler2(
@@ -651,7 +619,14 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         continueRoutine = True
         # update component parameters for each repeat
         # setup some python lists for storing info about the mouse
+        mouse.x = []
+        mouse.y = []
+        mouse.leftButton = []
+        mouse.midButton = []
+        mouse.rightButton = []
+        mouse.time = []
         gotValidClick = False  # until a click is received
+        mouse.mouseClock.reset()
         polygon.setOpacity(opacity)
         # Run 'Begin Routine' code from code
         #set the initial position of the dot in the beginning
@@ -660,7 +635,6 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         posy = 0
         pos = (posx, posy)
         
-        print(opacity)
         #Save the time in the beginning of each condition
         #so we know how long it's been running
         start = time.time()
@@ -669,7 +643,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         trial.tStart = globalClock.getTime(format='float')
         trial.status = STARTED
         thisExp.addData('trial.started', trial.tStart)
-        trial.maxDuration = 5
+        trial.maxDuration = 10
         # keep track of which components have finished
         trialComponents = trial.components
         for thisComponent in trial.components:
@@ -689,7 +663,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         if isinstance(trials, data.TrialHandler2) and thisTrial.thisN != trials.thisTrial.thisN:
             continueRoutine = False
         trial.forceEnded = routineForceEnded = not continueRoutine
-        while continueRoutine and routineTimer.getTime() < 5.0:
+        while continueRoutine and routineTimer.getTime() < 10.0:
             # get current time
             t = routineTimer.getTime()
             tThisFlip = win.getFutureFlipTime(clock=routineTimer)
@@ -709,11 +683,9 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
                 mouse.tStart = t  # local t and not account for scr refresh
                 mouse.tStartRefresh = tThisFlipGlobal  # on global time
                 win.timeOnFlip(mouse, 'tStartRefresh')  # time at next scr refresh
-                # add timestamp to datafile
-                thisExp.addData('mouse.started', t)
                 # update status
                 mouse.status = STARTED
-                prevButtonState = mouse.getPressed()  # if button is down already this ISN'T a new click
+                prevButtonState = [0, 0, 0]  # if now button is down we will treat as 'new' click
             
             # if mouse is stopping this frame...
             if mouse.status == STARTED:
@@ -723,10 +695,17 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
                     mouse.tStop = t  # not accounting for scr refresh
                     mouse.tStopRefresh = tThisFlipGlobal  # on global time
                     mouse.frameNStop = frameN  # exact frame index
-                    # add timestamp to datafile
-                    thisExp.addData('mouse.stopped', t)
                     # update status
                     mouse.status = FINISHED
+            if mouse.status == STARTED:  # only update if started and not finished!
+                x, y = mouse.getPos()
+                mouse.x.append(x)
+                mouse.y.append(y)
+                buttons = mouse.getPressed()
+                mouse.leftButton.append(buttons[0])
+                mouse.midButton.append(buttons[1])
+                mouse.rightButton.append(buttons[2])
+                mouse.time.append(mouse.mouseClock.getTime())
             
             # *polygon* updates
             
@@ -829,6 +808,12 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         trial.tStopRefresh = tThisFlipGlobal
         thisExp.addData('trial.stopped', trial.tStop)
         # store data for trials (TrialHandler)
+        trials.addData('mouse.x', mouse.x)
+        trials.addData('mouse.y', mouse.y)
+        trials.addData('mouse.leftButton', mouse.leftButton)
+        trials.addData('mouse.midButton', mouse.midButton)
+        trials.addData('mouse.rightButton', mouse.rightButton)
+        trials.addData('mouse.time', mouse.time)
         # Run 'End Routine' code from code
         #change opacity from the one we ran first to the other one
         if opacity == 0.03:
@@ -841,7 +826,7 @@ def run(expInfo, thisExp, win, globalClock=None, thisSession=None):
         elif trial.forceEnded:
             routineTimer.reset()
         else:
-            routineTimer.addTime(-5.000000)
+            routineTimer.addTime(-10.000000)
         thisExp.nextEntry()
         
     # completed 2.0 repeats of 'trials'

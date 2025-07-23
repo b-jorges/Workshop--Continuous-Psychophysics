@@ -1,0 +1,70 @@
+1.2462 	WARNING 	Requested audio device 'Headphones (Arctis Nova 7)' that is not available on this hardware. The 'audioDevice' preference should be one of ['Headphones (Oculus Virtual Audio Device)', 'SVSi NSeries (NVIDIA High Definition Audio)', 'Speakers (Realtek(R) Audio)']
+4.7044 	DEBUG 	Fullscreen settings ignored as running in pilot mode.
+4.7053 	INFO 	Loaded monitor calibration from ['2025_06_05 01:23']
+5.3114 	EXP 	Created window1 = Window(allowGUI=True, allowStencil=False, autoLog=True, backendConf=UNKNOWN, backgroundFit=<method-wrapper '__getattribute__' of attributeSetter object at 0x000001DCC3292CE0>, backgroundImage=<method-wrapper '__getattribute__' of attributeSetter object at 0x000001DCC3292C80>, bitsMode=UNKNOWN, blendMode='avg', bpc=(8, 8, 8), color=array([0, 0, 0]), colorSpace='rgb', depthBits=8, fullscr=False, gamma=None, gammaErrorPolicy='raise', infoMsg=UNKNOWN, lms=UNKNOWN, monitor=<psychopy.monitors.calibTools.Monitor object at 0x000001DCC3358220>, multiSample=False, name='window1', numSamples=2, pos=[560.0, 240.0], screen=0, size=array([800, 600]), stencilBits=0, stereo=False, title='PsychoPy', units='height', useFBO=True, useRetina=False, viewOri=0.0, viewPos=None, viewScale=None, waitBlanking=True, winType='pyglet')
+5.3115 	EXP 	window1: backgroundImage = ''
+5.3115 	EXP 	window1: backgroundFit = 'none'
+5.3364 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3371 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3377 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3385 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3393 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3396 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3402 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3410 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3413 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3415 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3421 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3427 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3433 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3439 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3444 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3450 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3457 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3460 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3464 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3472 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3480 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3491 	DEBUG 	Uploading Texture Font fontname to graphics card
+5.3798 	DEBUG 	Upload of Texture Font fontname complete
+5.3856 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3865 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3873 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.3875 	DEBUG 	Uploading Texture Font fontname to graphics card
+5.3956 	DEBUG 	Upload of Texture Font fontname complete
+5.3973 	EXP 	window1: Attempting to measure frame rate of screen (0) ...
+5.3973 	EXP 	window1: recordFrameIntervals = False
+5.4874 	EXP 	window1: recordFrameIntervals = True
+5.8888 	EXP 	Screen (0) actual frame rate measured at 159.20Hz
+5.8888 	EXP 	window1: recordFrameIntervals = False
+5.8941 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.8946 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.8953 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.8961 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.8970 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.8979 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.8983 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.8990 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.9005 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.9013 	DEBUG 	TextBox2 loaded 1 chars with 0 blanks and 1 valid
+5.9016 	DEBUG 	Uploading Texture Font fontname to graphics card
+5.9021 	DEBUG 	Upload of Texture Font fontname complete
+5.9428 	WARNING 	launchHubServer: If using the iohub mouse or eyetracker devices, fullScr should be True.
+7.3300 	INFO 	keyboard.Keyboard is using iohub backend.
+7.3300 	EXP 	ContPsyTracking: status = STARTED
+7.3437 	EXP 	Created polygon_2 = ShapeStim(__class__=<class 'psychopy.visual.shape.ShapeStim'>, anchor=('center', 'center'), autoDraw=False, autoLog=True, closeShape=True, color=method-wrapper(...), colorSpace='rgb', contrast=None, depth=-1.0, draggable=False, fillColor=array([1, 1, 1]), fillColorSpace='rgb', fillRGB=array([1, 1, 1]), interpolate=True, lineColor=array([1., 1., 1.]), lineColorSpace='rgb', lineRGB=array([1, 1, 1]), lineWidth=1.0, name='polygon_2', opacity=1, ori=0.0, pos=array([1., 1.]), size=array([0.05, 0.05]), units='cm', vertices=ndarray(...), win=Window(...), windingRule=None)
+7.3460 	EXP 	Created polygon = ShapeStim(__class__=<class 'psychopy.visual.shape.ShapeStim'>, anchor=('center', 'center'), autoDraw=False, autoLog=True, closeShape=True, color=method-wrapper(...), colorSpace='rgb', contrast=None, depth=-1.0, draggable=False, fillColor=array([1, 1, 1]), fillColorSpace='rgb', fillRGB=array([1, 1, 1]), interpolate=True, lineColor=array([1., 1., 1.]), lineColorSpace='rgb', lineRGB=array([1, 1, 1]), lineWidth=1.0, name='polygon', opacity=1.0, ori=0.0, pos=array([0., 0.]), size=array([1., 1.]), units='cm', vertices=ndarray(...), win=Window(...), windingRule=None)
+0.0187 	EXP 	polygon_2: autoDraw = True
+4.4456 	DATA 	Mouse: Left button down, pos=(434,335)
+4.4491 	EXP 	New trial (rep=0, index=0): <Trial 0 (0 in rep 0) data={'thisN': 0, 'thisTrialN': 0, 'thisRepN': 0}>
+4.4536 	EXP 	polygon_2: autoDraw = False
+4.4536 	EXP 	polygon: autoDraw = True
+4.5915 	DATA 	Mouse:  Left button up, pos=(434,335)
+14.4312 	EXP 	New trial (rep=1, index=0): <Trial 1 (0 in rep 1) data={'thisN': 1, 'thisTrialN': 0, 'thisRepN': 1}>
+14.4393 	EXP 	polygon: autoDraw = False
+14.4393 	EXP 	polygon: autoDraw = True
+24.4396 	EXP 	polygon: autoDraw = False
+24.4411 	EXP 	ContPsyTracking: status = STOPPED
+24.4911 	INFO 	saved data to 'C:\\Users\\lab\\Documents\\GitHub\\Workshop--Continuous-Psychophysics\\Experiment\\ContPsyTracking\\data/407153_ContPsyTracking_2025-07-15_10h01.00.695.csv'
+24.4986 	INFO 	saved data to C:\Users\lab\Documents\GitHub\Workshop--Continuous-Psychophysics\Experiment\ContPsyTracking\data/407153_ContPsyTracking_2025-07-15_10h01.00.695.psydat
+24.9372 	DEBUG 	Saving data for ContPsyTracking ExperimentHandler

@@ -1,4 +1,4 @@
-#install.packages(c("dplyr", "ggplot2", "cowplot", "ggdist"))
+# install.packages(c("dplyr", "ggplot2", "cowplot", "ggdist"))
 
 require(dplyr)
 require(ggplot2)
@@ -35,13 +35,14 @@ for (i in flist){
   Responses_Wide = rbind(Responses_Wide,Data2)
 }
 
+Responses_Wide$
 Responses_Wide = Responses_Wide %>%
-  group_by(participant) %>%
+  group_by(participant, session) %>%
   #transform recorded mouse data into same unit as displayed polygon (cm from center of screen)
-                      mutate(mouse_2.x = as.numeric(substr(mouse_2.x[1], 2, 6)),
-                             mouse_2.y = as.numeric(substr(mouse_2.y[1], 2, 6)),
-                             mouse_x_cm = x_coord_mouse*(1/mouse_2.x),
-                             mouse_y_cm = y_coord_mouse*(1/mouse_2.y),
+                      mutate(mouse_2.x = as.numeric(substr(mouse_2.x[1], 2, 5)),
+                             mouse_2.y = as.numeric(substr(mouse_2.y[1], 2, 5)),
+                             mouse_x_cm = x_coord_mouse*(5/mouse_2.x),
+                             mouse_y_cm = y_coord_mouse*(5/mouse_2.y),
                              
                              #to take away the correlation between target position at t and target position at t + 1,
                              #we calculate the x and y speeds of target and mouse cursor
@@ -61,7 +62,7 @@ Responses_Wide = Responses_Wide %>%
 #some basic plots#
 ##################
 #target versus mouse (x)
-ggplot(Responses_Wide %>% filter(participant == unique(Responses_Wide$participant)[1] & session == 1), 
+ggplot(Responses_Wide %>% filter(participant == unique(Responses_Wide$participant)[2] & session == 1), 
        aes(time_in_run, x_coord_target)) +
   geom_point() +
   geom_point(aes(time_in_run, mouse_x_cm), color = "red") +
@@ -86,8 +87,8 @@ ggplot(Responses_Wide %>% filter(participant == unique(Responses_Wide$participan
 
 #x versus y
 ggplot(Responses_Wide %>% filter(participant == unique(Responses_Wide$participant)[1] & 
-                                   session == 1 & 
-                                   time_in_run > 10 & time_in_run < 20), 
+                                   session == 1 &
+                                   time_in_run > 10 &  time_in_run < 20), 
        aes(x_coord_target, y_coord_target)) +
   geom_point() +
   geom_point(aes(mouse_x_cm, mouse_y_cm), color = "red") +
@@ -103,31 +104,34 @@ ggplot(Responses_Wide %>% filter(participant == unique(Responses_Wide$participan
 ###################
 
 #how many frames in 1s
-HowManyFrames = 1/median(Responses_Wide$FrameDuration)
+CCG_Frame_Temp = data.frame()
 
-CCG_Frame = data.frame()
-
-#create copies of the dataframe where we lag target and response positions
-#by 1 to HowManyFrames in steps of 4 (only 4 to keep size of this dataframe manageable)
-for (i in seq(1,HowManyFrames,4)){
-  CCG_Frame = rbind(CCG_Frame, Responses_Wide %>%
-                      ungroup() %>%
-                      
-                      #select only those columns that we need for further analysis
-                      select(participant,opacity,FrameDuration, session,
-                             mouse_speed.x, mouse_speed.y, 
-                             target_speed.x, target_speed.y) %>%
-                      group_by(participant, opacity) %>%
-                      
-                      #lag the target speed by i frames (such as to cover a range of no lag to 1s lag)
-                      mutate(target_speed.x_lagged = lag(target_speed.x, i),
-                             target_speed.y_lagged = lag(target_speed.y, i),
-                             
-                             lag = i))
+for (j in unique(Responses_Wide$participant)){
+  
+  Responses_Wide_Temp = Responses_Wide %>% filter(participant == j)
+  HowManyFrames = 1/median(Responses_Wide_Temp$FrameDuration)
+  
+  #create copies of the dataframe where we lag target and response positions
+  #by 1 to HowManyFrames in steps of 4 (only 4 to keep size of this dataframe manageable)
+  for (i in seq(1,HowManyFrames,4)){
+    CCG_Frame_Temp = rbind(CCG_Frame_Temp, Responses_Wide_Temp %>%
+                        ungroup() %>%
+                        
+                        #select only those columns that we need for further analysis
+                        select(participant, opacity, FrameDuration, session,
+                               mouse_speed.x, mouse_speed.y, 
+                               target_speed.x, target_speed.y) %>%
+                        group_by(participant, opacity, session) %>%
+                        
+                        #lag the target speed by i frames (such as to cover a range of no lag to 1s lag)
+                        mutate(target_speed.x_lagged = lag(target_speed.x, i),
+                               target_speed.y_lagged = lag(target_speed.y, i),
+                               
+                               lag = i))
+  }
 }
 
-
-CCG_Frame = CCG_Frame %>%
+CCG_Frame = CCG_Frame_Temp %>%
   group_by(participant, opacity, session, lag) %>%
   
   #Calculate the correlation between target and response speeds for each lag
@@ -318,8 +322,6 @@ for (j in unique((Responses_Wide$participant))){
                                       session = k,
                                       Estimate = Fit$minimum,
                                       RMSE = Fit$objective))
-      
-      print(OptimResults)
       
       print("Done")
     }
