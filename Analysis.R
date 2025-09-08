@@ -345,23 +345,3 @@ ggplot(OptimResults %>%
   ylab("Sensory Noise Parameter (cm)") +
   scale_x_discrete(name = "Opacity")
 #########################
-
-
-ggplot(OptimResults %>%
-         group_by(participant,opacity) %>% 
-         dplyr::slice(1) %>%
-         group_by(opacity) %>%
-         mutate(Mean_Per_Condition = mean(K),
-                SD_Per_Condition = sd(K)), 
-       aes(as.factor(opacity), K)) + #take the square root because we want to report standard deviation not variance
-  geom_point(aes(as.factor(opacity),Mean_Per_Condition), position = position_dodge(width = 0.2), size = 5) +
-  geom_errorbar(aes(ymin = Mean_Per_Condition-SD_Per_Condition, 
-                    ymax = Mean_Per_Condition+SD_Per_Condition), 
-                position = position_dodge(width = 0.2), width = 0.2, linewidth = 1.5) +
-  stat_dots(side = "right", justification = -0.2, size = 2, alpha = 0.33) +
-  theme(axis.text=element_text(size=18),
-        axis.title.y = element_text(size=18),
-        axis.title = element_text(size=18),
-        legend.text = element_text(size=18)) +
-  ylab("Sensory Noise Parameter (cm)") +
-  scale_x_discrete(name = "Opacity")
