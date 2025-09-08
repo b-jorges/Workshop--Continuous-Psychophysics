@@ -35,14 +35,13 @@ for (i in flist){
   Responses_Wide = rbind(Responses_Wide,Data2)
 }
 
-Responses_Wide$
 Responses_Wide = Responses_Wide %>%
   group_by(participant, session) %>%
   #transform recorded mouse data into same unit as displayed polygon (cm from center of screen)
                       mutate(mouse_2.x = as.numeric(substr(mouse_2.x[1], 2, 5)),
                              mouse_2.y = as.numeric(substr(mouse_2.y[1], 2, 5)),
-                             mouse_x_cm = x_coord_mouse*(5/mouse_2.x),
-                             mouse_y_cm = y_coord_mouse*(5/mouse_2.y),
+                             mouse_x_cm = x_coord_mouse*(1/mouse_2.x),
+                             mouse_y_cm = y_coord_mouse*(1/mouse_2.y),
                              
                              #to take away the correlation between target position at t and target position at t + 1,
                              #we calculate the x and y speeds of target and mouse cursor
@@ -62,19 +61,20 @@ Responses_Wide = Responses_Wide %>%
 #some basic plots#
 ##################
 #target versus mouse (x)
-ggplot(Responses_Wide %>% filter(participant == unique(Responses_Wide$participant)[2] & session == 1), 
+range(Responses_Wide$mouse_x_cm)
+ggplot(Responses_Wide %>% filter(participant == unique(Responses_Wide$participant) & session == 1), 
        aes(time_in_run, x_coord_target)) +
   geom_point() +
   geom_point(aes(time_in_run, mouse_x_cm), color = "red") +
   ylab("x position") +
   xlab("Time (s)") +
-  facet_grid(.~opacity) +
+  facet_grid(participant~opacity) +
   theme(axis.title=element_text(size=18),
         axis.text = element_text(size=18),
         strip.text = element_text(size = 18))
 
 #target versus mouse (y)
-ggplot(Responses_Wide %>% filter(participant == unique(Responses_Wide$participant)[1] & session == 1), 
+ggplot(Responses_Wide %>% filter(participant == unique(Responses_Wide$participant) & session == 1), 
        aes(time_in_run, y_coord_target)) +
   geom_point() +
   geom_point(aes(time_in_run, mouse_y_cm), color = "red") +
@@ -269,31 +269,21 @@ KalmanFilter = function(R){
   #the posterior (P) and the variance of the likelihood (R)
   K = (P + Q)/(P + Q + R)
   
-  #here we beginn fitting. For each sensory uncertainty (R) we try out, we generate predictions 50 times
-  #and compare them to what we actually observe from the participants.
-  #the goal is to minimize these residuals.
-  #Here we deviate from Bonnen et al. 2015 to implement an RMSE minimization rather than the arguably
+  #here we beginn fitting.
+  #We deviate from Bonnen et al. 2015 to implement an RMSE minimization rather than the arguably
   #harder-to-follow maximum likelihood estimation employed in Bonnen et al.
-  Residuals = c()
-  
-  for (i in 1:50){
-  #y_t.x and y_t.x are the perceived location of the stimulus in x and y directions. 
-  #We assume that there is no bias, so that would be the actual position (x_t.x) 
-  #with noise added (via the rnorm() function)
-  y_t.x = x_t.x + rnorm(length(x_t.x),0,R)
   
   #The Kalman filter weighs the internal representation of the object location (x_hat_t.x) at t-1
   #versus the uncertainty with which the stimulus is perceived at t+0 (we use the lag() function)
   #to achieve the t-1 // t+0 offset.
-  Predictions.x = (1 - K)*x_hat_t.x + K*lag(y_t.x,1)
+  Predictions.x = (1 - K)*x_hat_t.x + K*lag(x_t.x,1)
   
   #same thing but in y direction
-  y_t.y = x_t.y + rnorm(length(x_t.y),0,R)
-  Predictions.y = (1 - K)*x_hat_t.y + K*lag(y_t.y,1)
+  Predictions.y = (1 - K)*x_hat_t.y + K*lag(x_t.y,1)
   
   #get the residuals by comparing predictions (Predictions.x, Predictions.y) to the observed
   #data (x_hat_t.x, x_hat_t.y). We use lag() to line them up properly
-  Residuals = c(Residuals, lag(Predictions.x, 1) - x_hat_t.x, lag(Predictions.y, 1) - x_hat_t.y)}
+  Residuals = c(lag(Predictions.x,1) - x_hat_t.x, lag(Predictions.y, 1) - x_hat_t.y)
 
   #get the Root Mean Squared Error from the residuals
   (mean(Residuals^2, na.rm = TRUE))^0.5
@@ -312,7 +302,7 @@ for (j in unique((Responses_Wide$participant))){
       
       #we use the optimize() function to minimize the RMSE in the KalmanFilter() function set up above.
       #lower and upper are the limits for the R values optimize() will try out
-      Fit = optimize(KalmanFilter, lower = 0.005, upper = 10)
+      Fit = optimize(KalmanFilter, lower = 0.005, upper = 100000)
       #keep in mind that R is the VARIANCE
       
       #save the participant/condition, the fitted R, as well as the RMSE corresponding to the fitted R
@@ -328,6 +318,10 @@ for (j in unique((Responses_Wide$participant))){
   }
 }
 
+OptimResults = OptimResults %>% 
+  mutate(Q = 0.3^2,
+         P = (Q / 2) * (sqrt(1 + 4 * Estimate / Q) - 1),
+         K = (P + Q)/(P + Q + Estimate))
 
 #########################
 ###plot the fitted Rs####
@@ -351,3 +345,23 @@ ggplot(OptimResults %>%
   ylab("Sensory Noise Parameter (cm)") +
   scale_x_discrete(name = "Opacity")
 #########################
+
+
+ggplot(OptimResults %>%
+         group_by(participant,opacity) %>% 
+         dplyr::slice(1) %>%
+         group_by(opacity) %>%
+         mutate(Mean_Per_Condition = mean(K),
+                SD_Per_Condition = sd(K)), 
+       aes(as.factor(opacity), K)) + #take the square root because we want to report standard deviation not variance
+  geom_point(aes(as.factor(opacity),Mean_Per_Condition), position = position_dodge(width = 0.2), size = 5) +
+  geom_errorbar(aes(ymin = Mean_Per_Condition-SD_Per_Condition, 
+                    ymax = Mean_Per_Condition+SD_Per_Condition), 
+                position = position_dodge(width = 0.2), width = 0.2, linewidth = 1.5) +
+  stat_dots(side = "right", justification = -0.2, size = 2, alpha = 0.33) +
+  theme(axis.text=element_text(size=18),
+        axis.title.y = element_text(size=18),
+        axis.title = element_text(size=18),
+        legend.text = element_text(size=18)) +
+  ylab("Sensory Noise Parameter (cm)") +
+  scale_x_discrete(name = "Opacity")
